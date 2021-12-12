@@ -5,11 +5,9 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /*
 Имеются
@@ -18,12 +16,23 @@ import java.util.Set;
 - коллекция всех регионов Collection<Area>
 На выходе хочется получить множество строк вида "Имя - регион". Если у персон регионов несколько, таких строк так же будет несколько
  */
+
 public class Task6 implements Task {
 
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    return new HashSet<>();
+    Map<Integer, Area> areaMap = areas.stream()
+            .collect(Collectors.toMap(
+                    Area::getId,
+                    Function.identity()
+            ));
+
+    return persons.stream()
+            .flatMap(person -> personAreaIds.get(person.getId())
+                    .stream()
+                    .map(areaId -> person.getFirstName() + " - " + areaMap.get(areaId).getName()))
+            .collect(Collectors.toSet());
   }
 
   @Override
