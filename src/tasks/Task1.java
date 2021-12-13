@@ -4,9 +4,7 @@ import common.Person;
 import common.PersonService;
 import common.Task;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -18,20 +16,33 @@ import java.util.stream.Collectors;
  */
 public class Task1 implements Task {
 
-  // !!! Редактируйте этот метод !!!
-  private List<Person> findOrderedPersons(List<Integer> personIds) {
-    Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
-  }
+    // !!! Редактируйте этот метод !!!
+    private List<Person> findOrderedPersons(List<Integer> personIds) {
+        class PositionComparator implements Comparator<Person> {
 
-  @Override
-  public boolean check() {
-    List<Integer> ids = List.of(1, 2, 3);
+            @Override
+            public int compare(Person p1, Person p2) {
+                return Integer.compare(personIds.indexOf(p1.getId()), personIds.indexOf(p2.getId()));
 
-    return findOrderedPersons(ids).stream()
-        .map(Person::getId)
-        .collect(Collectors.toList())
-        .equals(ids);
-  }
+            }
+        }
+
+        Set<Person> persons = PersonService.findPersons(personIds);
+
+
+        return persons.stream().sorted(
+                Comparator.comparingInt(p -> personIds.indexOf(p.getId()))).collect(Collectors.toList());
+    }
+
+
+    @Override
+    public boolean check() {
+        List<Integer> ids = List.of(1, 2, 3);
+
+        return findOrderedPersons(ids).stream()
+                .map(Person::getId)
+                .collect(Collectors.toList())
+                .equals(ids);
+    }
 
 }
