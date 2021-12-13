@@ -3,12 +3,7 @@ package tasks;
 import common.Person;
 import common.Task;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,75 +18,74 @@ P.P.S Здесь ваши правки желательно прокоммент
  */
 public class Task8 implements Task {
 
-  private long count;
-
   //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
+  // что за фальшивая персона такая
   public List<String> getNames(List<Person> persons) {
+    // понял вроде намек про одну персону, надеюсь, что правильно понял
+    // поэтому убрал удаление первого и, возможно, единственного элемента
     if (persons.size() == 0) {
       return Collections.emptyList();
     }
-    persons.remove(0);
     return persons.stream().map(Person::getFirstName).collect(Collectors.toList());
   }
 
   //ну и различные имена тоже хочется
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    // зачем тут стрим по уникальным, так еще и в сет потом,
+    // так что просто сразу сет делаю
+    return new HashSet<>(getNames(persons));
   }
 
   //Для фронтов выдадим полное имя, а то сами не могут
   public String convertPersonToString(Person person) {
-    String result = "";
+    // если мы проверяем методы на выдачу нул, то имхо стоит
+    // для начала проверить, что сам person != null, иначе вернуть вот такое
+    if (person == null) return "null";
+
+    // конкатенация строк медленная - билдер лучше имхо,
+    // хотя на таких строчках мб и не заметно было бы
+    StringBuilder fullName = new StringBuilder();
     if (person.getSecondName() != null) {
-      result += person.getSecondName();
+      fullName.append(person.getSecondName());
     }
 
     if (person.getFirstName() != null) {
-      result += " " + person.getFirstName();
+      fullName.append(person.getFirstName());
     }
-
-    if (person.getSecondName() != null) {
-      result += " " + person.getSecondName();
-    }
-    return result;
+    // тут второй раз вызывалось первая проверка, так что я ее убрал
+    // и оставил только ретурн
+    return fullName.toString();
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
-    }
-    return map;
+    // Суть та же, только теперь есть проверка на нул + выглядит приятнее
+    return persons.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toMap(
+                    Person::getId,
+                    this::convertPersonToString,
+                    (a, b) -> a
+            ));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    // учел фидбек и исправил
+    return persons1.stream()
+            .anyMatch(new HashSet<>(persons2)::contains);
   }
 
   //...
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    // убрал поле у класса и сделал метод короче и понятнее
+    return numbers.filter(x -> x % 2 == 0).count();
   }
 
   @Override
   public boolean check() {
-    System.out.println("Слабо дойти до сюда и исправить Fail этой таски?");
-    boolean codeSmellsGood = false;
-    boolean reviewerDrunk = false;
-    return codeSmellsGood || reviewerDrunk;
+    boolean codeSmellsGood = true;
+    String reviewerDrunk = "кто ж знает";
+    return codeSmellsGood;
   }
 }
