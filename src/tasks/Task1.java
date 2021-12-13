@@ -18,17 +18,10 @@ public class Task1 implements Task {
 
     // !!! Редактируйте этот метод !!!
     private List<Person> findOrderedPersons(List<Integer> personIds) {
-        class PositionComparator implements Comparator<Person> {
 
-            @Override
-            public int compare(Person p1, Person p2) {
-                return Integer.compare(personIds.indexOf(p1.getId()), personIds.indexOf(p2.getId()));
-
-            }
-        }
 
         Set<Person> persons = PersonService.findPersons(personIds);
-
+//        Map<Integer, Integer> personPos =
 
         return persons.stream().sorted(
                 Comparator.comparingInt(p -> personIds.indexOf(p.getId()))).collect(Collectors.toList());

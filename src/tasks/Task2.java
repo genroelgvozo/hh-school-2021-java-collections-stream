@@ -23,7 +23,7 @@ public class Task2 implements Task {
 
         return Stream.concat(persons1.stream(), persons2.stream()).sorted(
                 Comparator.comparing(Person::getCreatedAt)
-        ).limit(limit).collect(Collectors.toList());
+        ).limit(limit).toList();
     }
 
     @Override
