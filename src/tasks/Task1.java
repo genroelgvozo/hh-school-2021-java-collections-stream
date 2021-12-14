@@ -20,11 +20,14 @@ public class Task1 implements Task {
     private List<Person> findOrderedPersons(List<Integer> personIds) {
 
 
-        Set<Person> persons = PersonService.findPersons(personIds);
-//        Map<Integer, Integer> personPos =
+        Set<Person> persons = PersonService.findPersons(personIds); // Сделаем словарь id -> позиция персоны
+        Map<Integer, Integer> personPos = new HashMap<>();
+        for (int i = 0; i < personIds.size(); i++) {
+            personPos.put(personIds.get(i), i);
+        }
 
         return persons.stream().sorted(
-                Comparator.comparingInt(p -> personIds.indexOf(p.getId()))).collect(Collectors.toList());
+                Comparator.comparingInt(p -> personPos.get(p.getId()))).toList(); // Сложность будет O(nlog)
     }
 
 

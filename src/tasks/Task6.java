@@ -24,14 +24,16 @@ public class Task6 implements Task {
                                               Collection<Area> areas) {
         Map<Integer, String> areaName = areas.stream().collect(Collectors.toMap(Area::getId, Area::getName)); // Создадим словарь с названиями регионов
 
-        return persons.stream().flatMap(p -> personAreaIds.get(p.getId()).stream().map(areaId -> makeResultString(p.getFirstName(), areaName.get(areaId)))).collect(Collectors.toSet());
+        return persons.stream()
+                .flatMap(
+                        p -> personAreaIds.get(p.getId()).stream()
+                                .map(areaId -> makeResultString(p.getFirstName(), areaName.get(areaId))))
+                .collect(Collectors.toSet());
     }
 
     private String makeResultString(String name, String area) {
         return name + " - " + area;
     }
-
-
 
 
     @Override

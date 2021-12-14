@@ -3,12 +3,7 @@ package tasks;
 import common.Person;
 import common.Task;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,64 +22,69 @@ public class Task8 implements Task {
 
   //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
+    if (persons == null || persons.size() == 0) { // Добавим проверку, что лист не null
       return Collections.emptyList();
     }
-//    persons.remove(0); Вместо удалнеия первого элемента, эфективнее его пропустить в стриме с помощью .skip()
-    return persons.stream().skip(0).map(Person::getFirstName).collect(Collectors.toList());
+    //Вместо удаления первого элемента, эффективнее его пропустить в стриме с помощью .skip()
+    // Так же уберем null персон
+    return persons.stream().skip(0).filter(Objects::nonNull).map(Person::getFirstName).collect(Collectors.toList());
   }
 
   //ну и различные имена тоже хочется
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    return new HashSet<>(getNames(persons)); // можно сделать создание множества короче
   }
 
   //Для фронтов выдадим полное имя, а то сами не могут
+  // Метод работает как-то странно, у нас же может получиться на выходе -> ФамилияИмя Имя!
+  // Думаю лучше сделать список, а потом его заджойнить с пробелом
+
   public String convertPersonToString(Person person) {
-    String result = "";
+    if (person == null) { // Добавим проверку, что персона не null
+      return "";
+    }
+    ArrayList<String> result = new ArrayList<>();
     if (person.getSecondName() != null) {
-      result += person.getSecondName();
+      result.add(person.getSecondName());
     }
 
     if (person.getFirstName() != null) {
-      result += " " + person.getFirstName();
+      result.add(person.getFirstName());
     }
 
-    if (person.getSecondName() != null) {
-      result += " " + person.getSecondName();
-    }
-    return result;
+
+    return String.join(" ", result);
   }
 
   // словарь id персоны -> ее имя
+  // Можно сделать то же самое с помощью стрима, плюс добавить проверку на null
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
+    if (persons == null || persons.size() == 0) {
+      return Collections.emptyMap(); // Добавим проверку на null
     }
-    return map;
+    return persons.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toMap(
+                    Person::getId,
+                    this::convertPersonToString
+            ));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
+  // Так же сделаем с помощью стрима
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
+    // Проверим на null и пустые списки
+    if (persons1 == null || persons2 == null || persons1.size() == 0 || persons2.size() == 0) {
+      return false;
     }
-    return has;
+    return persons1.stream()
+            .filter(Objects::nonNull)
+            .anyMatch(p -> new HashSet<>(persons2).contains(p));
   }
 
-  //...
+  //Можно сделать попроще, используя count
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers.filter(n -> n % 2 == 0).count();
   }
 
   @Override
