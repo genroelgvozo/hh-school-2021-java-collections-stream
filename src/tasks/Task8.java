@@ -30,8 +30,8 @@ public class Task8 implements Task {
     if (persons.size() == 0) {
       return Collections.emptyList();
     }
-    persons.remove(0);
-    return persons.stream().map(Person::getFirstName).collect(Collectors.toList());
+//    persons.remove(0); Вместо удалнеия первого элемента, эфективнее его пропустить в стриме с помощью .skip()
+    return persons.stream().skip(0).map(Person::getFirstName).collect(Collectors.toList());
   }
 
   //ну и различные имена тоже хочется
