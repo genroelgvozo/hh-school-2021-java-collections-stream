@@ -4,10 +4,9 @@ import common.Person;
 import common.PersonService;
 import common.Task;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /*
 Задача 1
@@ -16,22 +15,35 @@ import java.util.stream.Collectors;
 нужно их отсортировать в том же порядке, что и переданные id.
 Оценить асимпотику работы
  */
+
+/*  Комментарии
+
+Асимпотика следующая O(n) на заполнение HashMap + O(n) перебор set Person
+Итого O(2*n) -> O(n)
+HashMap использую для быстрого получения порядка Персоны в последовательности O(1)
+*/
 public class Task1 implements Task {
 
-  // !!! Редактируйте этот метод !!!
-  private List<Person> findOrderedPersons(List<Integer> personIds) {
-    Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
-  }
+    // !!! Редактируйте этот метод !!!
+    private List<Person> findOrderedPersons(List<Integer> personIds) {
+        Set<Person> persons = PersonService.findPersons(personIds);
 
-  @Override
-  public boolean check() {
-    List<Integer> ids = List.of(1, 2, 3);
+        Map<Integer, Integer> hmPersonIds = IntStream.range(0, personIds.size()).boxed().collect(Collectors.toMap(personIds::get, i -> i));
+        Person[] personsInRightOrder = new Person[persons.size()];
 
-    return findOrderedPersons(ids).stream()
-        .map(Person::getId)
-        .collect(Collectors.toList())
-        .equals(ids);
-  }
+        persons.forEach(p -> personsInRightOrder[hmPersonIds.get(p.getId())] = p);
+
+        return Arrays.asList(personsInRightOrder);
+    }
+
+    @Override
+    public boolean check() {
+        List<Integer> ids = List.of(1, 2, 3);
+
+        return findOrderedPersons(ids).stream()
+                .map(Person::getId)
+                .collect(Collectors.toList())
+                .equals(ids);
+    }
 
 }
