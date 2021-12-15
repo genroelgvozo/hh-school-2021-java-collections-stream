@@ -5,11 +5,8 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 Имеются
@@ -20,21 +17,27 @@ import java.util.Set;
  */
 public class Task6 implements Task {
 
-  private Set<String> getPersonDescriptions(Collection<Person> persons,
-                                            Map<Integer, Set<Integer>> personAreaIds,
-                                            Collection<Area> areas) {
-    return new HashSet<>();
-  }
+    private Set<String> getPersonDescriptions(Collection<Person> persons,
+                                              Map<Integer, Set<Integer>> personAreaIds,
+                                              Collection<Area> areas) {
+        Map<Integer, String> areaNames = areas.stream().collect(Collectors.toMap(Area::getId, Area::getName));
+        Set<String> personDescription = new HashSet<>();
 
-  @Override
-  public boolean check() {
-    List<Person> persons = List.of(
-        new Person(1, "Oleg", Instant.now()),
-        new Person(2, "Vasya", Instant.now())
-    );
-    Map<Integer, Set<Integer>> personAreaIds = Map.of(1, Set.of(1, 2), 2, Set.of(2, 3));
-    List<Area> areas = List.of(new Area(1, "Moscow"), new Area(2, "Spb"), new Area(3, "Ivanovo"));
-    return getPersonDescriptions(persons, personAreaIds, areas)
-        .equals(Set.of("Oleg - Moscow", "Oleg - Spb", "Vasya - Spb", "Vasya - Ivanovo"));
-  }
+        persons.forEach(person -> personAreaIds.get(person.getId())
+                .forEach(areaId -> personDescription.add(person.getFirstName() + " - " + areaNames.get(areaId))));
+
+        return personDescription;
+    }
+
+    @Override
+    public boolean check() {
+        List<Person> persons = List.of(
+                new Person(1, "Oleg", Instant.now()),
+                new Person(2, "Vasya", Instant.now())
+        );
+        Map<Integer, Set<Integer>> personAreaIds = Map.of(1, Set.of(1, 2), 2, Set.of(2, 3));
+        List<Area> areas = List.of(new Area(1, "Moscow"), new Area(2, "Spb"), new Area(3, "Ivanovo"));
+        return getPersonDescriptions(persons, personAreaIds, areas)
+                .equals(Set.of("Oleg - Moscow", "Oleg - Spb", "Vasya - Spb", "Vasya - Ivanovo"));
+    }
 }
