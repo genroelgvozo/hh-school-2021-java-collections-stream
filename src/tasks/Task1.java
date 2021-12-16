@@ -4,9 +4,8 @@ import common.Person;
 import common.PersonService;
 import common.Task;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /*
@@ -21,7 +20,10 @@ public class Task1 implements Task {
   // !!! Редактируйте этот метод !!!
   private List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
+
+    //Сложим объекты Person в мапу с ключом id, чтобы доставать их за O(1). Считаем, что id уникален.
+    Map<Integer, Person> personsMap = persons.stream().collect(Collectors.toMap(Person::getId, Function.identity()));
+    return personIds.stream().map(personsMap::get).toList();
   }
 
   @Override

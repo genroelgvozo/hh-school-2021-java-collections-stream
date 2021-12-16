@@ -3,12 +3,7 @@ package tasks;
 import common.Person;
 import common.Task;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,71 +21,61 @@ public class Task8 implements Task {
   private long count;
 
   //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
-  public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
-      return Collections.emptyList();
-    }
-    persons.remove(0);
-    return persons.stream().map(Person::getFirstName).collect(Collectors.toList());
+  public List<String> getNamesExcludingFirst(List<Person> persons) {
+
+    //Не портим исходную коллекцию. Даем более понятное имя методу.
+    return persons.stream()
+            .skip(1)
+            .map(Person::getFirstName)
+            .toList();
   }
 
   //ну и различные имена тоже хочется
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+
+    //Set и так не содержит повторов
+    return new HashSet<>(getNamesExcludingFirst(persons));
   }
 
   //Для фронтов выдадим полное имя, а то сами не могут
-  public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.getSecondName() != null) {
-      result += person.getSecondName();
-    }
+  public String getPersonFullName(Person person) {
 
-    if (person.getFirstName() != null) {
-      result += " " + person.getFirstName();
-    }
-
-    if (person.getSecondName() != null) {
-      result += " " + person.getSecondName();
-    }
-    return result;
+    //Даем более понятное имя методу. Был баг с лишним пробелом.
+    return Stream.of(person.getSecondName(), person.getFirstName(), person.getMiddleName())
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
-  public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
-    }
-    return map;
+  public Map<Integer, String> getPersonNamesMap(Collection<Person> persons) {
+
+    //Даем более понятное имя методу. Фильтруем возможные повторы объектов.
+    return persons.stream()
+            .distinct()
+            .collect(Collectors.toMap(Person::getId, this::getPersonFullName));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
-  public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+  public boolean hasCommonElements(Collection<Person> persons1, Collection<Person> persons2) {
+
+    //Даем более понятное имя методу.
+    //Избавляемся от О(n^2) по сложности, тратя линейно память
+    //Напрашивающийся Collections.disjoint() - по сути то же самае, что и было (цикл в цикле).
+    Set<Person> personSet = new HashSet<>(persons1);
+    return persons2.stream().anyMatch(personSet::contains);
   }
 
   //...
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+
+    //Заменили на стрим
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   @Override
   public boolean check() {
     System.out.println("Слабо дойти до сюда и исправить Fail этой таски?");
-    boolean codeSmellsGood = false;
+    boolean codeSmellsGood = true; //Чуточку, да лучше, чем было =D
     boolean reviewerDrunk = false;
     return codeSmellsGood || reviewerDrunk;
   }

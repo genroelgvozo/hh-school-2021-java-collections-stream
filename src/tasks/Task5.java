@@ -5,7 +5,6 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,10 @@ public class Task5 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
-    return new ArrayList<>();
+
+    return persons.stream()
+            .map(person -> Task5.convert(person, personAreaIds.get(person.getId())))
+            .toList();
   }
 
   private static ApiPersonDto convert(Person person, Integer areaId) {
