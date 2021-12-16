@@ -5,11 +5,8 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 Имеются
@@ -23,7 +20,26 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    return new HashSet<>();
+    // сгенерирую map на основе list, чтобы было удобнее доставать значения
+    Map<Integer, String> personsNamesById = persons.stream()
+            .collect(Collectors.toMap(Person::getId, Person::getFirstName));
+    Map<Integer, String> areasNamesById = areas.stream()
+            .collect(Collectors.toMap(Area::getId, Area::getName));
+    Set<String> namesAndAreas = new HashSet<>();
+    // Пройдусь по заданному массиву и сформирую строки нужно вида
+    for (var personId: personAreaIds.keySet())
+      for (var areaId: personAreaIds.get(personId))
+        namesAndAreas.add(personsNamesById.get(personId) + " - " + areasNamesById.get(areaId));
+    return namesAndAreas;
+    // Можно сделать то же самое и через stream, но в этом задании,
+    // на мой взгляд, это выглядит менее читабельно:
+    /*
+    return personAreaIds.entrySet().stream()
+            .flatMap((personAreaId) -> personAreaId.getValue().stream()
+                    .map((areaId) -> personsNamesById.get(personAreaId.getKey())
+                            + " - " + areasNamesById.get(areaId)))
+            .collect(Collectors.toSet());
+    */
   }
 
   @Override
