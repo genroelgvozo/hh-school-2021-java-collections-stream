@@ -6,8 +6,10 @@ import common.Task;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /*
 Задача 5
@@ -20,7 +22,18 @@ public class Task5 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
-    return new ArrayList<>();
+    // черновая версия на коллекциях
+                /* List<ApiPersonDto> personApiPersonDto = new ArrayList<>(persons.size());
+                Iterator<Person> it = persons.iterator();
+                while (it.hasNext()){
+                  Person tmp = it.next();
+                  personApiPersonDto.add(convert(tmp,personAreaIds.get(tmp.getId())));
+                }
+                return personApiPersonDto;*/
+    // основная версия на стримах
+    // для каждого элемента входного списка вызываем функцию с двумя параметрами, результирующий поток преобразуем в список
+    return persons.stream().map((person) -> convert(person,personAreaIds.get(person.getId()))).collect(Collectors.toList());
+
   }
 
   private static ApiPersonDto convert(Person person, Integer areaId) {

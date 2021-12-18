@@ -6,7 +6,9 @@ import common.Vacancy;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
 Из коллекции компаний необходимо получить всевозможные различные названия вакансий
@@ -14,7 +16,26 @@ import java.util.Set;
 public class Task7 implements Task {
 
   private Set<String> vacancyNames(Collection<Company> companies) {
-    return new HashSet<>();
+    // черновая версия на коллекциях
+                  /*Set<String> vacancyNamesSet = new HashSet<>();
+
+                  Iterator<Company> companyIt = companies.iterator();
+
+                  while(companyIt.hasNext()){
+                    Company tmpCompany = companyIt.next();
+
+                    Iterator<Vacancy> vacancyIt = tmpCompany.getVacancies().iterator();
+
+                    while(vacancyIt.hasNext()){
+                      vacancyNamesSet.add(vacancyIt.next().getTitle());
+                    }
+                  }
+                  return vacancyNamesSet;*/
+    // рабочая версия на потоках
+    // раскручиваем множество вакансий компании в цепочку, добавляя в множество, тем самым обеспечивая уникальность
+    return companies.stream().flatMap(company -> company.getVacancies().stream()
+                                                        .map(vacancy -> vacancy.getTitle())
+                                      ).collect(Collectors.toSet());
   }
 
   @Override
