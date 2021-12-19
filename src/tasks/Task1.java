@@ -6,6 +6,7 @@ import common.Task;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,10 +19,15 @@ import java.util.stream.Collectors;
  */
 public class Task1 implements Task {
 
-  // !!! Редактируйте этот метод !!!
+  // Сложность 2*O(N)->O(N), расход по памяти O(N)
   private List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
+    Map<Integer, Person> mappedPersons = persons.stream().collect(Collectors.toUnmodifiableMap(Person::getId, person -> person));
+
+    return personIds.stream()
+            .filter(mappedPersons::containsKey)
+            .map(mappedPersons::get)
+            .collect(Collectors.toList());
   }
 
   @Override
