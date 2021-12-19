@@ -97,20 +97,11 @@ public class Task8 implements Task {
                 }
                 return has;*/
     // рабочая версия на стримах
-    // применяем в потоке метод, которому достаточно быть единственный раз true,
-    // внутри него запускаем цикл поиска во второй коллекции элементов первой,
-    // после первого нахождения, работа прекращается, результат возвращается
-    return persons1.stream().anyMatch((person) -> {
-                                                    var result = false;
-                                                    for(Person yetPerson : persons2){
-                                                      if(person.equals(yetPerson)){
-                                                        result =  true;
-                                                        break;
-                                                      }
-                                                    }
-                                                    return result;
-                                                  }
-                                      );
+    // применяем в потоке для первой коллекции метод, которому достаточно быть единственный раз true,
+    // внутри него в потоке для второй коллекции применяем метод, которому достаточно единственный раз быть true
+    // матрёшка
+    return persons1.stream().anyMatch((person) -> persons2.stream()
+                                                  .anyMatch((yetPerson) -> yetPerson.equals(person)));
   }
 
   //данный метод вообще из другой оперы и быть его здесь не должно, также убрал глобальную переменную, потому что
