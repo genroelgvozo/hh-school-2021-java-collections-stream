@@ -69,13 +69,8 @@ public class Task8 implements Task {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    Map<Integer, Person> mp2 = persons2.stream().collect(Collectors.toMap(Person::getId, Function.identity()));
-    for (Person person1 : persons1) {
-      if (mp2.containsKey(person1.getId()) && person1.equals(mp2.get(person1.getId()))) {
-        return true;
-      }
-    }
-    return false;
+    Set<Person> mp2 = new HashSet<>(persons2);
+    return persons1.stream().anyMatch(mp2::contains);
   }
 
   //...
