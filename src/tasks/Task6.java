@@ -5,11 +5,8 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*
 Имеются
@@ -23,7 +20,15 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    return new HashSet<>();
+    Map<Integer, Area> mappedAreas = areas.stream().collect(Collectors.toUnmodifiableMap(Area::getId, area -> area));
+    Set<String> result = new HashSet<>();
+    for(Person person : persons){
+        Set<Integer> areaIds = personAreaIds.get(person.getId());
+        for(Integer areaId : areaIds){
+            result.add(person.getFirstName() + " - " + mappedAreas.get(areaId).getName());
+        }
+    }
+    return result;
   }
 
   @Override
