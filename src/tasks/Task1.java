@@ -4,8 +4,8 @@ import common.Person;
 import common.PersonService;
 import common.Task;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +21,16 @@ public class Task1 implements Task {
   // !!! Редактируйте этот метод !!!
   private List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
+
+    // Нужна только карта соответствий
+    Map<Integer, Person> personNameId = persons.stream()
+    .collect(Collectors.toMap(Person::getId, x -> x));
+ 
+    // Собираем в лист по порядку указанному в personIds. Асимптотика метода O(n)
+    return personIds.stream()
+    .map(x -> personNameId.get(x))
+    .collect(Collectors.toList());
+
   }
 
   @Override
