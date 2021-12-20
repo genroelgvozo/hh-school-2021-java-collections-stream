@@ -25,39 +25,13 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    // черновой вариант на коллекциях
-                     /*Set<String> personDescriptions = new HashSet<String>();
-
-                    Iterator<Person> personIt = persons.iterator();
-
-                    while(personIt.hasNext()) {
-                      Person tmpPerson = personIt.next();
-
-                      Iterator<Integer> regionSet = personAreaIds.get(tmpPerson.getId()).iterator();
-
-                      while(regionSet.hasNext()){// перебор множества регионов
-                        Integer tmpRegion = regionSet.next();
-
-                        Iterator<Area> areaIt = areas.iterator();
-                        while(areaIt.hasNext()){ // поиск названия региона
-                          Area areaTmp = areaIt.next();
-
-                          if(areaTmp.getId() == tmpRegion) {
-                            personDescriptions.add(tmpPerson.getFirstName() + " - " + areaTmp.getName() );
-                            break;
-                          }
-                        }
-                      }
-                    }
-                    return personDescriptions;*/
-    // рабочий вариант на потоках
     // преобразуем коллекцию регионов в map, чтобы можно было по id региона получить его имя
-    Map<Integer,String> regionalMap = areas.stream().collect(Collectors.toMap(Area::getId,Area::getName));
+    Map<Integer,String> areaNames = areas.stream().collect(Collectors.toMap(Area::getId,Area::getName));
     // раскрутим каждое множество регионов в цепочку, сопоставив имени региона имя персоны
     // результат преобразуем в требуемое множество
-    return persons.stream().flatMap(person -> personAreaIds.get(person.getId()).stream()
-                                              .map(id -> person.getFirstName() + " - "+ regionalMap.get(id))
-                                    ).collect(Collectors.toSet());
+    return persons.stream().flatMap(person -> personAreaIds.get(person.getId())
+                                    .stream().map(id -> person.getFirstName() + " - "+ areaNames.get(id)))
+                           .collect(Collectors.toSet());
   }
 
   @Override

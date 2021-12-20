@@ -18,37 +18,12 @@ public class Task3 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<Person> sort(Collection<Person> persons) {
-    // черновой вариант на коллекциях
-                    /*List<Person> perList = new ArrayList<Person>(persons);
-
-                    perList.sort(new Comparator<Person>() {
-                      @Override
-                      public int compare(Person o1, Person o2) {
-                        if (!o1.getSecondName().equals(o2.getSecondName())){
-                          return o1.getSecondName().compareTo(o2.getSecondName());
-                        }
-                        else if (!o1.getFirstName().equals(o2.getFirstName())){
-                          return o1.getFirstName().compareTo(o2.getFirstName());
-                        }
-                        else return o1.getCreatedAt().compareTo(o2.getCreatedAt());
-
-                      }
-                    });
-                    return perList;*/
-    // версия на стримах
-    // методу sorted передаём компаратор, который организует требуемое сравнение, результат преобразуем в список
-    return persons.stream().sorted(new Comparator<Person>() {
-                                        @Override
-                                        public int compare(Person o1, Person o2) {
-                                          if (!o1.getSecondName().equals(o2.getSecondName())){
-                                            return o1.getSecondName().compareTo(o2.getSecondName());
-                                          }
-                                          else if (!o1.getFirstName().equals(o2.getFirstName())){
-                                            return o1.getFirstName().compareTo(o2.getFirstName());
-                                          }
-                                          else return o1.getCreatedAt().compareTo(o2.getCreatedAt());
-
-                                        }}).collect(Collectors.toList());
+    // методу sorted передаём компаратор и дальнейшие правила сравнения,
+    // которые организуют требуемое сравнение, результат преобразуем в список
+    return persons.stream().sorted(Comparator.comparing(Person::getSecondName)
+                                             .thenComparing(Person::getFirstName)
+                                             .thenComparing(Person::getCreatedAt))
+                           .collect(Collectors.toList());
 
   }
 

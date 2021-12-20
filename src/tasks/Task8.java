@@ -3,13 +3,7 @@ package tasks;
 import common.Person;
 import common.Task;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,12 +18,16 @@ P.P.S Здесь ваши правки желательно прокоммент
  */
 public class Task8 implements Task {
 
+  private long count;
+
   //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
   public List<String> getNames(List<Person> persons) {
-    if ( (persons.size() == 0) || (persons.size() == 1)   ) { // поскольку убираем первый элемент, то если всего 1,
-      return Collections.emptyList();                         // результирующий список также будет пуст
+    if ( persons.size() == 0 ) {
+      return Collections.emptyList();
     }
-    //persons.remove(0);     при работе с потоками можно пропустить сколько угодно первых элементов
+    //persons.remove(0); поскольку всё равно вскрывать поток, в потоке и вырежем первый элемент,
+    // в потоке его вырезать быстрее, поэтому эту строчку удалим, кроме того она внимание отвлекает
+    // и делает программу менее ясной
     return persons.stream().skip(1).map(Person::getFirstName).collect(Collectors.toList());
   }
 
@@ -40,38 +38,13 @@ public class Task8 implements Task {
 
   //Для фронтов выдадим полное имя, а то сами не могут
   public String convertPersonToString(Person person) {
-    // черновая версия без потоков                         два раза встречается getSecondName(), а должно быть getMiddleName()
-      /*          String result = "";                   // кроме того getFirstName() должно идти впереди
-
-                  if (person.getFirstName() != null) {
-                    result += person.getFirstName();    // при первой аббревиатуре первый пробел не нужен
-                  }
-
-                  if (person.getSecondName() != null) {
-                    result += result!=""?" ":"" + person.getSecondName();// если было имя, то нужно поставить " ", иначе ""
-                  }
-
-                  if (person.getMiddleName() != null) {
-                    result += result!=""?" ":"" + person.getMiddleName();
-                  }
-                  return result;*/
-    // рабочая версия с потоками
-    String result = ""; // на случай, если все три окажутся null, вернётся ""
-    // просто объединяем строки
-    return result + Stream.of(person.getFirstName(),person.getSecondName(),person.getMiddleName()).collect(Collectors.joining(" "));
+    return Stream.of(person.getFirstName(),person.getSecondName(),person.getMiddleName())
+                 .filter(Objects::nonNull)
+                 .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-            // версия на коллекциях
-            /*Map<Integer, String> map = new HashMap<>(persons.size());// можно сразу выделить нужный объем памяти, чтобы не
-            for (Person person : persons) {                          // перевыделять в дальнейшем
-              if (!map.containsKey(person.getId())) {
-                map.put(person.getId(), convertPersonToString(person));
-              }
-            }
-            return map;*/
-    // рабочая версия на потоках
     // собираем исходную коллекцию в требуемый map, не забывая указать, что дубликатов быть не должно
     // поскольку на это был акцент в исходном методе
     return persons.stream().collect(Collectors.toMap(
@@ -84,28 +57,19 @@ public class Task8 implements Task {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    // черновая версия на коллекциях
-                /*boolean has = false;
-                for (Person person1 : persons1) {
-                  for (Person person2 : persons2) {
-                    if (person1.equals(person2)) {
-                      has = true;
-                      break;  // после нахождения совпадающего элемента оба цикла нужно разбивать
-                    }
-                  }
-                  if (has) {break;}  // разбив внешнего цикла
-                }
-                return has;*/
-    // рабочая версия на стримах
-    // применяем в потоке для первой коллекции метод, которому достаточно быть единственный раз true,
-    // внутри него в потоке для второй коллекции применяем метод, которому достаточно единственный раз быть true
-    // матрёшка
-    return persons1.stream().anyMatch((person) -> persons2.stream()
-                                                  .anyMatch((yetPerson) -> yetPerson.equals(person)));
+    // чтобы ускорить работу метода до O(N) нужно использовать множества, потому что время поиска ну них O(1)
+    // например так
+    Set<Person> tmpPersons = new HashSet<>(persons1);
+    tmpPersons.retainAll(new HashSet<>(persons2));
+    return tmpPersons.size() != 0;
   }
 
-  //данный метод вообще из другой оперы и быть его здесь не должно, также убрал глобальную переменную, потому что
-  //она нигде не используется
+  //...
+  public long countEven(Stream<Integer> numbers) {// если значение у функции возвращается, нет смысла для него
+    // использовать свойство класса, это по смыслу разные значения
+    // forEach(...) нагляднее заменить на .count()
+    return numbers.filter(num -> num % 2 == 0).count();
+  }
 
 
   @Override

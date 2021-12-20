@@ -20,34 +20,12 @@ public class Task2 implements Task {
   private static List<Person> combineAndSortWithLimit(Collection<Person> persons1,
                                                       Collection<Person> persons2,
                                                       int limit) {
-    // версия на коллекциях - черновая
-                    /*List<Person> listPerson= new ArrayList<Person>(persons1.size() + persons2.size());
-
-                    Iterator<Person> it = persons1.iterator();
-                    while(it.hasNext()){listPerson.add(it.next());}
-                    it = persons2.iterator();
-                    while(it.hasNext()){listPerson.add(it.next());}
-
-                    listPerson.sort(new Comparator<Person>() {
-                      @Override
-                      public int compare(Person o1, Person o2) {
-                        return o1.getCreatedAt().compareTo(o2.getCreatedAt());
-                      }
-                    });
-
-                    return listPerson.stream().limit(limit).collect(Collectors.toList());*/
-    // версия на стримах - основная
     // методом concat объединим коллекции, полученный поток отсортируем, передав методу компаратор по времени создания
     // из полученного после сортировки потока отберём первые limit элементов
     return Stream.concat(persons1.stream(),persons2.stream())
-            .sorted(new Comparator<Person>() {
-              @Override
-              public int compare(Person o1, Person o2) {
-                return o1.getCreatedAt().compareTo(o2.getCreatedAt());
-              }
-            })
-            .limit(limit)
-            .collect(Collectors.toList());
+                 .sorted(Comparator.comparing(Person::getCreatedAt))
+                 .limit(limit)
+                 .collect(Collectors.toList());
   }
 
   @Override

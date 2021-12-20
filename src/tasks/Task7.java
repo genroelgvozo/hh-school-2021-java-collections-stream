@@ -16,26 +16,11 @@ import java.util.stream.Collectors;
 public class Task7 implements Task {
 
   private Set<String> vacancyNames(Collection<Company> companies) {
-    // черновая версия на коллекциях
-                  /*Set<String> vacancyNamesSet = new HashSet<>();
-
-                  Iterator<Company> companyIt = companies.iterator();
-
-                  while(companyIt.hasNext()){
-                    Company tmpCompany = companyIt.next();
-
-                    Iterator<Vacancy> vacancyIt = tmpCompany.getVacancies().iterator();
-
-                    while(vacancyIt.hasNext()){
-                      vacancyNamesSet.add(vacancyIt.next().getTitle());
-                    }
-                  }
-                  return vacancyNamesSet;*/
-    // рабочая версия на потоках
     // раскручиваем множество вакансий компании в цепочку, добавляя в множество, тем самым обеспечивая уникальность
-    return companies.stream().flatMap(company -> company.getVacancies().stream()
-                                                        .map(vacancy -> vacancy.getTitle())
-                                      ).collect(Collectors.toSet());
+    return companies.stream().map(Company::getVacancies)
+                             .flatMap(Collection::stream)
+                             .map(Vacancy::getTitle)
+                    .collect(Collectors.toSet());
   }
 
   @Override
