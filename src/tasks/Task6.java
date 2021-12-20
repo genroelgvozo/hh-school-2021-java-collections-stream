@@ -35,8 +35,8 @@ public class Task6 implements Task {
     // на мой взгляд, это выглядит менее читабельно:
     /*
     return personAreaIds.entrySet().stream()
-            .flatMap((personAreaId) -> personAreaId.getValue().stream()
-                    .map((areaId) -> personsNamesById.get(personAreaId.getKey())
+            .flatMap(personAreaId -> personAreaId.getValue().stream()
+                    .map(areaId -> personsNamesById.get(personAreaId.getKey())
                             + " - " + areasNamesById.get(areaId)))
             .collect(Collectors.toSet());
     */

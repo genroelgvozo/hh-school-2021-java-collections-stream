@@ -18,12 +18,10 @@ P.P.S Здесь ваши правки желательно прокоммент
  */
 public class Task8 implements Task {
 
-  private long count;
-
   //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
   public List<String> getNames(List<Person> persons) {
     return persons.stream()
-            .skip(1) // Пропустим один элемент, чтобы не обрабатывать фальшивую персону
+            .skip(1) // Убрал remove, так как он изменяет внешний список, на который ссылается persons
             .map(Person::getFirstName)
             .collect(Collectors.toList());
   }
@@ -35,38 +33,28 @@ public class Task8 implements Task {
 
   //Для фронтов выдадим полное имя, а то сами не могут
   static public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.getFirstName() != null) { // перепишем if, чтобы избавиться от неверных вариантов
-      result = person.getFirstName();
-    }
-    if (person.getSecondName() != null) {
-      if (result.isEmpty())
-        result = person.getSecondName();
-      else
-        result += " " + person.getSecondName();
-    }
-    return result;
+    return Stream.of(person.getFirstName(), person.getSecondName())
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    // Возспользуемся stream и только что поправленной функцией
     return persons.stream()
-            .collect(Collectors.toMap(Person::getId, Task8::convertPersonToString));
+            .collect(Collectors.toMap(Person::getId, Task8::convertPersonToString, (person1, person2) -> person1));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
     Set<Person> persons1AsSet = new HashSet<>(persons1); // с HashSet быдстрее
-    for (var person: persons2)
-      if (persons1AsSet.contains(person))
-        return true;
-    return false;
+    return persons2.stream()
+            .anyMatch(persons1AsSet::contains);
   }
 
   //...
   public long countEven(Stream<Integer> numbers) {
     return numbers.filter(num -> num % 2 == 0).count(); // Сократили с помощью метода count
+    // Ох, к этому методу я и забыл, что там наверху было странное поле :)
   }
 
   @Override
