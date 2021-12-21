@@ -59,9 +59,8 @@ public class Task8 implements Task {
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
     // чтобы ускорить работу метода до O(N) нужно использовать множества, потому что время поиска ну них O(1)
     // например так
-    Set<Person> tmpPersons = new HashSet<>(persons1);
-    tmpPersons.retainAll(new HashSet<>(persons2));
-    return tmpPersons.size() != 0;
+    Set<Person> personSet = new HashSet<>(persons2);
+    return persons1.stream().anyMatch(personSet::contains);
   }
 
   //...
