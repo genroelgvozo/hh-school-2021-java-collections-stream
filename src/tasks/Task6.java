@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
+import java.util.stream.Collectors;
 
 /*
 Имеются
@@ -23,7 +25,13 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    return new HashSet<>();
+    // преобразуем коллекцию регионов в map, чтобы можно было по id региона получить его имя
+    Map<Integer,String> areaNames = areas.stream().collect(Collectors.toMap(Area::getId,Area::getName));
+    // раскрутим каждое множество регионов в цепочку, сопоставив имени региона имя персоны
+    // результат преобразуем в требуемое множество
+    return persons.stream().flatMap(person -> personAreaIds.get(person.getId())
+                                    .stream().map(id -> person.getFirstName() + " - "+ areaNames.get(id)))
+                           .collect(Collectors.toSet());
   }
 
   @Override
