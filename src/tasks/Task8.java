@@ -3,12 +3,8 @@ package tasks;
 import common.Person;
 import common.Task;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.sql.ClientInfoStatus;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,27 +26,31 @@ public class Task8 implements Task {
     if (persons.size() == 0) {
       return Collections.emptyList();
     }
-    persons.remove(0);
-    return persons.stream().map(Person::getFirstName).collect(Collectors.toList());
+    //Если и делать изменения, то лучше в копии
+    List<Person> copyPersons = persons.stream().collect(Collectors.toList());
+    copyPersons.remove(0);
+    return copyPersons.stream().map(Person::getFirstName).collect(Collectors.toList());
   }
 
   //ну и различные имена тоже хочется
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    //в сет уже хранятся только уникальные значения, следовательно, дубликатов не будет
+    return getNames(persons).stream().collect(Collectors.toSet());
   }
 
   //Для фронтов выдадим полное имя, а то сами не могут
   public String convertPersonToString(Person person) {
     String result = "";
-    if (person.getSecondName() != null) {
+    //если и проверять на пустоту, то лучше функцией isEmpty, так как может попасть и пустая строка
+    if (person.getSecondName().isEmpty()) {
       result += person.getSecondName();
     }
 
-    if (person.getFirstName() != null) {
+    if (person.getFirstName().isEmpty()) {
       result += " " + person.getFirstName();
     }
 
-    if (person.getSecondName() != null) {
+    if (person.getSecondName().isEmpty()) {
       result += " " + person.getSecondName();
     }
     return result;
@@ -59,32 +59,28 @@ public class Task8 implements Task {
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
     Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
-    }
+    persons.forEach( (person -> {
+              map.put(person.getId(), convertPersonToString(person));
+            })
+    );
     return map;
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    //проверять каждый с каждым долго, проще посчитать
+    // количество до и после. добавим все записи в set, а так как
+    // там дублирование записей отсутствует, то будут только уникальные
+    Set<Person> allpersons =new HashSet<>();
+    allpersons.addAll(persons1);
+    allpersons.addAll(persons2);
+    //если уникальных записей меньше суммы размеров изначальных списков, то есть дубли
+    return persons1.size()+persons2.size() > allpersons.size();
   }
 
   //...
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers.filter(num -> num % 2 == 0).collect(Collectors.toList()).size();
   }
 
   @Override

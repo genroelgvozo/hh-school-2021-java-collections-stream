@@ -4,10 +4,10 @@ import common.Person;
 import common.PersonService;
 import common.Task;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.sql.ClientInfoStatus;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Задача 1
@@ -20,8 +20,19 @@ public class Task1 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<Person> findOrderedPersons(List<Integer> personIds) {
+
     Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
+    List<Person> resultSortPersons = new ArrayList<>();
+    personIds.forEach(
+            (personId)->{
+              resultSortPersons.addAll(
+                      persons.stream().filter(person->person.getId().equals(personId.intValue())).collect(Collectors.toList())
+              );}
+    );
+    // O(n^2)
+    return resultSortPersons;
+
+    // persons.stream().sorted((a,b)->a.getId().compareTo(b.getId())).collect(Collectors.toList());
   }
 
   @Override
