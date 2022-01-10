@@ -3,18 +3,22 @@ package tasks;
 import common.Company;
 import common.Task;
 import common.Vacancy;
-
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
 Из коллекции компаний необходимо получить всевозможные различные названия вакансий
  */
 public class Task7 implements Task {
 
+  // Просто еще раз тренируем flatMap, и понимаем, что лучше функциональный стиль, чем вложенные циклы и стримы
   private Set<String> vacancyNames(Collection<Company> companies) {
-    return new HashSet<>();
+    return companies.stream()
+        .map(Company::getVacancies)
+        .flatMap(Collection::stream)
+        .map(Vacancy::getTitle)
+        .collect(Collectors.toSet());
   }
 
   @Override

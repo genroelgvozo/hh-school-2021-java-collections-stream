@@ -2,13 +2,13 @@ package tasks;
 
 import common.Person;
 import common.Task;
-
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Задача 2
@@ -18,11 +18,20 @@ import java.util.stream.Collectors;
  */
 public class Task2 implements Task {
 
-  // !!! Редактируйте этот метод !!!
+  // Тут в целом таска найти Stream.concat, избегая лишних коллекций и копирования (хотя там временная память все равно тратися в момент sorted)
+  // Асимптотика - O(n log n)
   private static List<Person> combineAndSortWithLimit(Collection<Person> persons1,
                                                       Collection<Person> persons2,
                                                       int limit) {
-    return new ArrayList<>();
+
+    return Stream.concat(persons1.stream(), persons2.stream())
+        .sorted(Comparator.comparing(Person::getCreatedAt))
+        // тут один человек заметил хорошую особенность, что Comparator.comparing упадет, если поле null
+        // Вообще редко когда приходится сортировать в памяти, обычно все это на базе. Иногда приходится
+        // но часто мы сортируем по полям, которые в силу природы не могут быть null
+        // Но замечание хорошее, и если надо вам сортировать с null-ами то Comparator.nullsLast(Comparator.comparing(Person::getCreatedAt)) или nullFirst, смотря как надо
+        .limit(limit)
+        .collect(Collectors.toList());
   }
 
   @Override

@@ -3,13 +3,14 @@ package tasks;
 import common.Area;
 import common.Person;
 import common.Task;
-
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /*
 Имеются
@@ -23,7 +24,23 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    return new HashSet<>();
+    Map<Integer, Area> areaMap = areas.stream()
+        .collect(Collectors.toMap(Area::getId, Function.identity()));
+    // Тут многие делали areaNameMap - это ок, если сразу в стриме ниже складывать для краткости
+    // Но если хочется формирование строки вынести в метод (а это правильно, оно может переиспользоваться, да и менять его тогда более очевидно где, это своебразный конвертер в view представление
+    // то туда надо передавать только Person и Area. Пусть метод сам решает что ему брать (может ФИО захочет, а у Арейки какое-нибудь краткое название или еще что)
+    return persons.stream()
+        .flatMap(person -> personAreaIds.getOrDefault(person.getId(), Collections.emptySet()).stream()
+            // вроде на это не обращал внимание, но достаточно важно сделать default
+            // так как связи с арейками могут быть не у всех персон, и тогда мы просто упадем
+            .map(areaMap::get)
+            .map(area -> convertToDescription(person, area))
+        )
+        .collect(Collectors.toSet());
+  }
+
+  public static String convertToDescription(Person person, Area area) {
+    return String.format("%s - %s", person.getFirstName(), area.getName());
   }
 
   @Override

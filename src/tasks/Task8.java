@@ -2,12 +2,12 @@ package tasks;
 
 import common.Person;
 import common.Task;
-
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,75 +23,73 @@ P.P.S Здесь ваши правки желательно прокоммент
  */
 public class Task8 implements Task {
 
-  private long count;
-
   //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
+  // Естественно костыльный метод, легаси, удалить, исправить, отрефакторить (или нет :joy_hyper:, привет, ты знаешь о ком я)
+  // но бывает всякое, и надо если и костылить, то с умом!
   public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
-      return Collections.emptyList();
-    }
-    persons.remove(0);
-    return persons.stream().map(Person::getFirstName).collect(Collectors.toList());
+    // проверка со скипом не нужна, пустой стрим - в пустой, если элемент 1 - то тоже будет пустой, лишних действий не будет
+    // persons.remove(0);
+    // 1 - коллекция может быть неизменяемой - List.of
+    // 2 - передавая коллекцию в метод getNames (т.е. геттер, просто возвращающий) вы не ожидаете что вам ее сломают
+    // 3 - удаление первого тупо медленно может быть, если ArrayList - частая причина от решающих, но на деле в данном кейсе наименее важная
+    // (если оно не работает, то не важно быстро или медленно :troll:)
+    return persons.stream()
+        .skip(1) // не модифицируем исходную коллекцию, а просто пропускаем что нам надо
+        .map(Person::getFirstName)
+        .collect(Collectors.toList());
   }
 
   //ну и различные имена тоже хочется
+  // ну тут вообще два раза следуешь подсказке идеи о ненужности кусочка, и она все решает за тебя.
+  // Да и в лекции все было, проверка на тех кто внимательно смотрел презу)
   public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+    return new HashSet<>(getNames(persons));
   }
 
   //Для фронтов выдадим полное имя, а то сами не могут
+  // Нарочно два раза сделал SecondName показав что в куче ифов (еще и неверных немного, пробел в начале все равно возможен) можно легко ошибиться
+  // Правда ход не удался, многие просто удаляли со словами х***я какая-то (впрочем это тоже показатель плохого кода, ты вообще хз как должно быть
+  // И тут показываем, что стримы это не только про коллекции/списки/сеты, а про то, как удобно описать работу с данными английскими (понятными надеюсь) словами
   public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.getSecondName() != null) {
-      result += person.getSecondName();
-    }
-
-    if (person.getFirstName() != null) {
-      result += " " + person.getFirstName();
-    }
-
-    if (person.getSecondName() != null) {
-      result += " " + person.getSecondName();
-    }
-    return result;
+    return Stream.of(person.getSecondName(), person.getFirstName(), person.getMiddleName())
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining(" "));
   }
 
   // словарь id персоны -> ее имя
+  // Тут просто плохо, единица в конструкторе зачем-то, ретурн не сразу из цикла а лишняя переменная. Но в любом случае собрать в мапу удобнее через стрим
+  // Хоть и почти все ловились на том, что поведение меняется, исходный код пропускал дубли (а в Collection они допускаются), а в toMap надо юзать третий параметр
+  // Кто-то добавлял .distinct() - но это во-первых требует equals - а не всегда он переопределен норм, да и не понятно а точно ли он соотносится с ключом по которому добавляем в мапу
+  // а equals объектов не означает равность ключей, как и наоборот (equals персон мог например сравнивать по ФИО, хоть это и плохо)
+  // ну и лишняя память, дистинкту требуется временный хешсет, куда все складывать, чтобы за линейное время отсеять дубли, иначе только за квадрат
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
-    }
-    return map;
+    return persons.stream()
+        .collect(Collectors.toMap(Person::getId, this::convertPersonToString, (a, b) -> a));
   }
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+    return !Collections.disjoint(persons1, persons2);
+    // тут много вариантов. disjoint сработает быстрее, если одна из коллекций Set - на ней будет выполняться contains, который работает быстрее чем O(n) - на хешах за О(1), на дереве за логарифм
+    // еще мой любимый вариант это persons1.stream().anyMatch(persons2::contains) - чуть понятнее чем отрицание disjoint (и слово такое непонятное), но работает иногда медленнее - если сетом оказался persons1
+    // еще можно потратить память, и превратить одну коллекцию в сет за линейное время, и тогда все будет точно за линейное время работать - persons1.stream().anyMatch(new HashSet<>(persons2)::contains)
+    // Причем в таком варианте мы создаем ОДИН раз сет, а потом передаем его contains в метод
   }
 
   //...
+  // Метод тоже вообще плох, не передавайте никуда стримы никогда. Они же не репитабл
+  // Кто-то если поюзает стрим, то больше стрим не заиспользуешь, поэтому смысла передавать его нет (лучше коллекцию)
+  // но в целом идея показать что юзайте ка встроенный метод .count(), так как стрим может быть параллельным, а исходный вариант может выдать неверный результат
+  // операция ++ не атомарная и не тредсейф, соответственно два потока могут одновременно пытаться увеличить переменную, и она изменится только на единицу
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers.filter(num -> num % 2 == 0).count();
   }
 
   @Override
   public boolean check() {
     System.out.println("Слабо дойти до сюда и исправить Fail этой таски?");
-    boolean codeSmellsGood = false;
-    boolean reviewerDrunk = false;
+    boolean codeSmellsGood = true;
+    boolean reviewerDrunk = true;
     return codeSmellsGood || reviewerDrunk;
   }
 }
