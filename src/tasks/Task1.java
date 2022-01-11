@@ -21,8 +21,10 @@ public class Task1 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<Person> findOrderedPersons(List<Integer> personIds) {
-    Set<Person> persons = PersonService.findPersons(personIds);
-    return persons.stream().sorted(Comparator.comparing(person -> personIds.indexOf(person.getId()))).toList();
+    return PersonService.findPersons(personIds)
+        .stream()
+        .sorted(Comparator.comparing(person -> personIds.indexOf(person.getId())))
+        .toList();
   }
 
   @Override
