@@ -5,7 +5,6 @@ import common.Task;
 import common.Vacancy;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
