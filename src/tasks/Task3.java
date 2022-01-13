@@ -4,8 +4,8 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -16,7 +16,9 @@ public class Task3 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<Person> sort(Collection<Person> persons) {
-    return new ArrayList<>(persons);
+    return persons.stream()
+        .sorted(Comparator.comparing(Person::getSecondName).thenComparing(Person::getFirstName).thenComparing(Person::getCreatedAt))
+        .toList();
   }
 
   @Override
